@@ -71,10 +71,10 @@ def toggle_auto_simulation():
 
 
 def start_auto_simulation():
-    """Автоматически запускает симуляцию каждые 10 секунд."""
+    """Автоматически запускает симуляцию каждые 0.01 секунд."""
     run_simulation()
     global auto_simulation_id
-    auto_simulation_id = root.after(100, start_auto_simulation)
+    auto_simulation_id = root.after(10, start_auto_simulation)
 
 
 def on_parameter_change(*args):
@@ -154,7 +154,7 @@ diameter_entry.insert(0, "12.954")
 auto_simulation_var = tk.BooleanVar(value=False)
 auto_simulation_id = None
 auto_simulation_checkbox = ttk.Checkbutton(
-    param_frame, text="Реагировать на изменения и запускать каждые 10 секунд",
+    param_frame, text="Реагировать на изменения и запускать каждые 0.01 секунд",
     variable=auto_simulation_var, command=toggle_auto_simulation
 )
 auto_simulation_checkbox.grid(row=len(params) + 1, column=0, columnspan=2, pady=10)
