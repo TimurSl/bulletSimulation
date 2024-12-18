@@ -100,49 +100,49 @@ def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, x0=0, y0=0, z0=350, d
 
     return x, y, z
 
-# Example usage
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
-# Parameters for the first simulation
-x, y, z = simulate_bullet_trajectory(
-    m=0.04277, # kg (0.04277 kg = 42.77 g)
-    v0=792.5, # m/s
-    theta=-0.0 * np.pi, # radians
-    phi=0.434 * np.pi, # radians
-    wx=-2.6482849519085416, # m/s currently in London
-    wy=-3.1561031056501894, # m/s currently in London
-    wz=0.0, # m/s (no wind in the Z-axis)
-    x0=0, # m
-    y0=0, # m
-    z0=66, # m height of the BIG BEN from sea level
-    t_max=10, # s (simulation time)
-    Cd=0.686, # drag coefficient for a bullet (0.686)
-    A=calculate_cross_sectional_area(12.954), # m^2 (cross-sectional area of a 12.954 mm bullet)
-    dt=0.001 # s (time step)
-)
-ax.plot(x, y, z, label='Trajectory 1')
-
-# Add a target cube (10x10x10 meters)
-target_center = [250, 200, 10]  # Center of the target cube
-cube_size = 10
-
-# Plot edges of the cube
-for i in range(2):
-    for j in range(2):
-        for k in range(2):
-            x_corner = target_center[0] + cube_size * (-0.5 if i == 0 else 0.5)
-            y_corner = target_center[1] + cube_size * (-0.5 if j == 0 else 0.5)
-            z_corner = target_center[2] + cube_size * (-0.5 if k == 0 else 0.5)
-            ax.scatter(x_corner, y_corner, z_corner, color="blue")
-
-# Add a red dot where the bullet lands
-if len(x) > 0:
-    ax.scatter(x[-1], y[-1], z[-1], color="red", label="Impact Point", s=50)
-
-# Axis labels and legend
-ax.set_xlabel('X (м)')
-ax.set_ylabel('Y (м)')
-ax.set_zlabel('Z (м)')
-ax.legend()
-plt.show()
+# # Example usage
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+#
+# # Parameters for the first simulation
+# x, y, z = simulate_bullet_trajectory(
+#     m=0.04277, # kg (0.04277 kg = 42.77 g)
+#     v0=792.5, # m/s
+#     theta=-0.0 * np.pi, # radians
+#     phi=0.434 * np.pi, # radians
+#     wx=-2.6482849519085416, # m/s currently in London
+#     wy=-3.1561031056501894, # m/s currently in London
+#     wz=0.0, # m/s (no wind in the Z-axis)
+#     x0=0, # m
+#     y0=0, # m
+#     z0=66, # m height of the BIG BEN from sea level
+#     t_max=10, # s (simulation time)
+#     Cd=0.686, # drag coefficient for a bullet (0.686)
+#     A=calculate_cross_sectional_area(12.954), # m^2 (cross-sectional area of a 12.954 mm bullet)
+#     dt=0.001 # s (time step)
+# )
+# ax.plot(x, y, z, label='Trajectory 1')
+#
+# # Add a target cube (10x10x10 meters)
+# target_center = [250, 200, 10]  # Center of the target cube
+# cube_size = 10
+#
+# # Plot edges of the cube
+# for i in range(2):
+#     for j in range(2):
+#         for k in range(2):
+#             x_corner = target_center[0] + cube_size * (-0.5 if i == 0 else 0.5)
+#             y_corner = target_center[1] + cube_size * (-0.5 if j == 0 else 0.5)
+#             z_corner = target_center[2] + cube_size * (-0.5 if k == 0 else 0.5)
+#             ax.scatter(x_corner, y_corner, z_corner, color="blue")
+#
+# # Add a red dot where the bullet lands
+# if len(x) > 0:
+#     ax.scatter(x[-1], y[-1], z[-1], color="red", label="Impact Point", s=50)
+#
+# # Axis labels and legend
+# ax.set_xlabel('X (м)')
+# ax.set_ylabel('Y (м)')
+# ax.set_zlabel('Z (м)')
+# ax.legend()
+# plt.show()
