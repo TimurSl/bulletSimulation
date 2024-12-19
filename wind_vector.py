@@ -57,7 +57,7 @@ if __name__ == "__main__":
     api_key = "c3c167faed44acf64accc2ac70b1b3c5"  # Replace with your OpenWeatherMap API key
 
     # Example: Query by city name
-    location = "London"
+    location = "Kyiv"
     result = get_wind_vector(api_key, location=location)
     print(f"Wind in {result['location']} (Coordinates: {result['coordinates']}):")
     print(f"  - Speed: {result['wind_speed']} m/s")

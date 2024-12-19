@@ -5,19 +5,142 @@ import matplotlib.pyplot as plt
 import numpy as np
 from simulation import simulate_bullet_trajectory, calculate_cross_sectional_area
 
+from PySide6.QtWidgets import QSlider
+from PySide6.QtCore import Qt
+
+
 # Пресеты оружия
 WEAPON_PRESETS = {
-    "M4A1": {"v0": 880, "m": 0.012, "Cd": 0.295, "diameter_mm": 5.56},
-    "AK-47": {"v0": 715, "m": 0.016, "Cd": 0.310, "diameter_mm": 7.62},
-    "Barrett M82": {"v0": 853, "m": 0.04277, "Cd": 0.686, "diameter_mm": 12.7}
+    "Barrett M82": { }
 }
 
 # Пресеты боеприпасов
 AMMO_PRESETS = {
-    "Standard": {"Cd": 0.295, "diameter_mm": 5.56},
-    "Armor Piercing": {"Cd": 0.330, "diameter_mm": 7.62},
-    "Explosive": {"Cd": 0.400, "diameter_mm": 12.7}
+    # .50 BMG
+    "Barret M82 | 647 gr Speer (G1)": {
+        "Cd": 0.686,
+        "diameter_mm": 12.98,
+        "m": 0.042,
+        "v0": 928
+    },
+    "Barret M82 | 647 gr Speer (G7)": {
+        "Cd": 0.351,
+        "diameter_mm": 12.98,
+        "m": 0.042,
+        "v0": 928
+    },
+    "Barret M82 | 655 gr ADI (G1)": {
+        "Cd": 0.686,
+        "diameter_mm": 12.98,
+        "m": 0.042,
+        "v0": 923
+    },
+    "Barret M82 | 655 gr ADI (G7)": {
+        "Cd": 0.351,
+        "diameter_mm": 12.98,
+        "m": 0.042,
+        "v0": 923
+    },
+    "Barret M82 | 700 gr Barnes (G1)": {
+        "Cd": 0.686,
+        "diameter_mm": 12.98,
+        "m": 0.045,
+        "v0": 908
+    },
+    "Barret M82 | 700 gr Barnes (G7)": {
+        "Cd": 0.351,
+        "diameter_mm": 12.98,
+        "m": 0.045,
+        "v0": 908
+    },
+    "Barret M82 | 750 gr Hornady (G1)": {
+        "Cd": 0.686,
+        "diameter_mm": 12.98,
+        "m": 0.049,
+        "v0": 860
+    },
+    "Barret M82 | 750 gr Hornady (G7)": {
+        "Cd": 0.351,
+        "diameter_mm": 12.98,
+        "m": 0.049,
+        "v0": 860
+    },
+    "Barret M82 | 800 gr Barnes (G1)": {
+        "Cd": 0.686,
+        "diameter_mm": 12.98,
+        "m": 0.052,
+        "v0": 882
+    },
+    "Barret M82 | 800 gr Barnes (G7)": {
+        "Cd": 0.351,
+        "diameter_mm": 12.98,
+        "m": 0.052,
+        "v0": 882
+    },
+
+    # 7.92x57 Mauser
+    "7.92x57 Mauser | 11.3 g HPBT (G1)": {
+        "Cd": 0.290,
+        "diameter_mm": 7.92,
+        "m": 0.0113,
+        "v0": 797
+    },
+    "7.92x57 Mauser | 11.3 g HPBT (G7)": {
+        "Cd": 0.148,
+        "diameter_mm": 7.92,
+        "m": 0.0113,
+        "v0": 797
+    },
+    "7.92x57 Mauser | 11.7 g FMJ (G1)": {
+        "Cd": 0.290,
+        "diameter_mm": 7.92,
+        "m": 0.0117,
+        "v0": 786
+    },
+    "7.92x57 Mauser | 11.7 g FMJ (G7)": {
+        "Cd": 0.148,
+        "diameter_mm": 7.92,
+        "m": 0.0117,
+        "v0": 786
+    },
+    "7.92x57 Mauser | 11.7 g SP (800 m/s, G1)": {
+        "Cd": 0.290,
+        "diameter_mm": 7.92,
+        "m": 0.0117,
+        "v0": 800
+    },
+    "7.92x57 Mauser | 11.7 g SP (800 m/s, G7)": {
+        "Cd": 0.148,
+        "diameter_mm": 7.92,
+        "m": 0.0117,
+        "v0": 800
+    },
+    "7.92x57 Mauser | 9.7 g FMJ (G1)": {
+        "Cd": 0.290,
+        "diameter_mm": 7.92,
+        "m": 0.0097,
+        "v0": 865
+    },
+    "7.92x57 Mauser | 9.7 g FMJ (G7)": {
+        "Cd": 0.148,
+        "diameter_mm": 7.92,
+        "m": 0.0097,
+        "v0": 865
+    },
+    "7.92x57 Mauser | 11.7 g SP (805 m/s, G1)": {
+        "Cd": 0.290,
+        "diameter_mm": 7.92,
+        "m": 0.0117,
+        "v0": 805
+    },
+    "7.92x57 Mauser | 11.7 g SP (805 m/s, G7)": {
+        "Cd": 0.148,
+        "diameter_mm": 7.92,
+        "m": 0.0117,
+        "v0": 805
+    }
 }
+
 
 # Пресеты окружения
 ENVIRONMENT_PRESETS = {
@@ -55,6 +178,8 @@ class BulletTrajectorySimulator(QMainWindow):
 
         # Устанавливаем начальные размеры
         splitter.setSizes([300, 700])  # Левая часть (параметры): 300px, правая часть (график): 700px
+
+        self.default_limits = {"x": None, "y": None, "z": None}
 
         # Weapon presets
         self.weapon_label = QLabel("Выберите оружие:")
@@ -102,7 +227,8 @@ class BulletTrajectorySimulator(QMainWindow):
             ("Шаг времени (dt, с):", "dt"),
             ("Масса пули (m, кг):", "m"),
             ("Коэф. сопротивления (Cd):", "Cd"),
-            ("Диаметр пули (мм):", "diameter_mm")
+            ("Диаметр пули (мм):", "diameter_mm"),
+            ("Температура воздуха (T, K)", "T_kelvin")
         ]
 
         for label, key in self.params:
@@ -111,6 +237,38 @@ class BulletTrajectorySimulator(QMainWindow):
             param_entry = QLineEdit()
             self.param_layout.addWidget(param_entry)
             self.entries[key] = param_entry
+
+        self.scale_label = QLabel("Масштаб графика:")
+        self.param_layout.addWidget(self.scale_label)
+
+        self.scale_sliders = {}
+        for axis in ["x", "y", "z"]:
+            label = QLabel(f"Масштаб {axis}:")
+            self.param_layout.addWidget(label)
+
+            slider = QSlider(Qt.Horizontal)
+            slider.setMinimum(25)  # 1/4 от среднего значения
+            slider.setMaximum(400)  # 4x среднего значения
+            slider.setValue(100)  # Исходное значение (1x)
+            slider.valueChanged.connect(self.update_axis_scale)
+            self.param_layout.addWidget(slider)
+            self.scale_sliders[axis] = slider
+
+
+        # Общий масштаб
+        self.global_scale_label = QLabel("Общий масштаб:")
+        self.param_layout.addWidget(self.global_scale_label)
+        self.global_scale_slider = QSlider(Qt.Horizontal)
+        self.global_scale_slider.setMinimum(25)
+        self.global_scale_slider.setMaximum(400)
+        self.global_scale_slider.setValue(100)
+        self.global_scale_slider.valueChanged.connect(self.update_global_scale)
+        self.param_layout.addWidget(self.global_scale_slider)
+
+        # Кнопка сброса масштаба
+        self.reset_button = QPushButton("Сбросить масштаб")
+        self.reset_button.clicked.connect(self.reset_scale)
+        self.param_layout.addWidget(self.reset_button)
 
         # Interval and auto-update
         self.interval_label = QLabel("Интервал автообновления (мс):")
@@ -124,6 +282,8 @@ class BulletTrajectorySimulator(QMainWindow):
         self.auto_update_button.setCheckable(True)
         self.auto_update_button.clicked.connect(self.toggle_auto_update)
         self.param_layout.addWidget(self.auto_update_button)
+
+
 
         # Run button
         self.run_button = QPushButton("Запустить симуляцию")
@@ -149,6 +309,8 @@ class BulletTrajectorySimulator(QMainWindow):
         if preset:
             self.entries["Cd"].setText(str(preset["Cd"]))
             self.entries["diameter_mm"].setText(str(preset["diameter_mm"]))
+            self.entries["m"].setText(str(preset["m"]))
+            self.entries["v0"].setText(str(preset["v0"]))
 
     def apply_environment_preset(self):
         env_name = self.env_dropdown.currentText()
@@ -181,7 +343,7 @@ class BulletTrajectorySimulator(QMainWindow):
                 wx=params["wx"], wy=params["wy"], wz=params["wz"],
                 x0=params["x0"], y0=params["y0"], z0=params["z0"],
                 t_max=params["t_max"], dt=params["dt"],
-                m=params["m"], Cd=params["Cd"], A=params["A"]
+                m=params["m"], Cd=params["Cd"], A=params["A"], T_kelvin=params["T_kelvin"]
             )
 
             # Update plot
@@ -190,10 +352,12 @@ class BulletTrajectorySimulator(QMainWindow):
             self.ax.scatter(x[0], y[0], z[0], color="green", label="Shot Origin", s=50)
             self.ax.scatter(x[-1], y[-1], z[-1], color="red", label="Impact Point", s=50)
 
-            # Display impact coordinates
-            impact_text = f"Impact Point: X={x[-1]:.2f}, Y={y[-1]:.2f}, Z={z[-1]:.2f}"
-            print(impact_text)  # Display in console
-            self.ax.text(x[-1], y[-1], z[-1], impact_text, color="red", fontsize=10)
+            # Save axis limits
+            self.default_limits = {
+                "x": self.ax.get_xlim(),
+                "y": self.ax.get_ylim(),
+                "z": self.ax.get_zlim()
+            }
 
             # Axis labels
             self.ax.set_xlabel("X (м)")
@@ -204,6 +368,37 @@ class BulletTrajectorySimulator(QMainWindow):
             self.canvas.draw()
         except Exception as e:
             print(f"Ошибка: {e}")
+
+
+    def update_axis_scale(self):
+        """
+        Update the scale of individual axes based on their sliders.
+        """
+        for axis, slider in self.scale_sliders.items():
+            if self.default_limits[axis] is None:
+                continue
+
+            scale_factor = slider.value() / 100
+            center = (self.default_limits[axis][0] + self.default_limits[axis][1]) / 2
+            range_val = (self.default_limits[axis][1] - self.default_limits[axis][0]) * scale_factor
+            getattr(self.ax, f"set_{axis}lim")([center - range_val / 2, center + range_val / 2])
+        self.canvas.draw()
+
+    def update_global_scale(self):
+        """
+        Update all axis scales based on the global scale slider.
+        """
+        global_scale = self.global_scale_slider.value()
+        for axis, slider in self.scale_sliders.items():
+            slider.setValue(global_scale)
+
+    def reset_scale(self):
+        """
+        Reset all scales to their default values.
+        """
+        self.global_scale_slider.setValue(100)
+        for slider in self.scale_sliders.values():
+            slider.setValue(100)
 
 
 if __name__ == "__main__":
