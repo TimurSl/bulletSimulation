@@ -17,61 +17,61 @@ WEAPON_PRESETS = {
 # Пресеты боеприпасов
 AMMO_PRESETS = {
     # .50 BMG
-    "Barret M82 | 647 gr Speer (G1)": {
+    ".50 BMG | 647 gr Speer (G1)": {
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.042,
         "v0": 928
     },
-    "Barret M82 | 647 gr Speer (G7)": {
+    ".50 BMG | 647 gr Speer (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
         "m": 0.042,
         "v0": 928
     },
-    "Barret M82 | 655 gr ADI (G1)": {
+    ".50 BMG | 655 gr ADI (G1)": {
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.042,
         "v0": 923
     },
-    "Barret M82 | 655 gr ADI (G7)": {
+    ".50 BMG | 655 gr ADI (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
         "m": 0.042,
         "v0": 923
     },
-    "Barret M82 | 700 gr Barnes (G1)": {
+    ".50 BMG | 700 gr Barnes (G1)": {
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.045,
         "v0": 908
     },
-    "Barret M82 | 700 gr Barnes (G7)": {
+    ".50 BMG | 700 gr Barnes (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
         "m": 0.045,
         "v0": 908
     },
-    "Barret M82 | 750 gr Hornady (G1)": {
+    ".50 BMG | 750 gr Hornady (G1)": {
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.049,
         "v0": 860
     },
-    "Barret M82 | 750 gr Hornady (G7)": {
+    ".50 BMG | 750 gr Hornady (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
         "m": 0.049,
         "v0": 860
     },
-    "Barret M82 | 800 gr Barnes (G1)": {
+    ".50 BMG | 800 gr Barnes (G1)": {
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.052,
         "v0": 882
     },
-    "Barret M82 | 800 gr Barnes (G7)": {
+    ".50 BMG | 800 gr Barnes (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
         "m": 0.052,
@@ -247,8 +247,8 @@ class BulletTrajectorySimulator(QMainWindow):
             self.param_layout.addWidget(label)
 
             slider = QSlider(Qt.Horizontal)
-            slider.setMinimum(25)  # 1/4 от среднего значения
-            slider.setMaximum(400)  # 4x среднего значения
+            slider.setMinimum(5)  # 1/4 от среднего значения
+            slider.setMaximum(1000)  # 4x среднего значения
             slider.setValue(100)  # Исходное значение (1x)
             slider.valueChanged.connect(self.update_axis_scale)
             self.param_layout.addWidget(slider)
@@ -259,8 +259,8 @@ class BulletTrajectorySimulator(QMainWindow):
         self.global_scale_label = QLabel("Общий масштаб:")
         self.param_layout.addWidget(self.global_scale_label)
         self.global_scale_slider = QSlider(Qt.Horizontal)
-        self.global_scale_slider.setMinimum(25)
-        self.global_scale_slider.setMaximum(400)
+        self.global_scale_slider.setMinimum(5)
+        self.global_scale_slider.setMaximum(1000)
         self.global_scale_slider.setValue(100)
         self.global_scale_slider.valueChanged.connect(self.update_global_scale)
         self.param_layout.addWidget(self.global_scale_slider)
@@ -351,6 +351,15 @@ class BulletTrajectorySimulator(QMainWindow):
             self.ax.plot(x, y, z, label="Trajectory", color="blue")
             self.ax.scatter(x[0], y[0], z[0], color="green", label="Shot Origin", s=50)
             self.ax.scatter(x[-1], y[-1], z[-1], color="red", label="Impact Point", s=50)
+
+            x, y, z = simulate_bullet_trajectory(
+                v0=params["v0"], theta=params["theta"], phi=params["phi"],
+                wx=0, wy=0, wz=0,
+                x0=params["x0"], y0=params["y0"], z0=params["z0"],
+                t_max=params["t_max"], dt=params["dt"],
+                m=params["m"], Cd=params["Cd"], A=params["A"], T_kelvin=params["T_kelvin"]
+            )
+            self.ax.plot(x, y, z, label="Trajectory (No Wind)", color="green")
 
             # Save axis limits
             self.default_limits = {
