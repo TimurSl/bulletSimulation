@@ -8,12 +8,6 @@ from simulation import simulate_bullet_trajectory, calculate_cross_sectional_are
 from PySide6.QtWidgets import QSlider
 from PySide6.QtCore import Qt
 
-
-# Пресеты оружия
-WEAPON_PRESETS = {
-    "Barrett M82": { }
-}
-
 # Пресеты боеприпасов
 AMMO_PRESETS = {
     # .50 BMG
@@ -181,16 +175,6 @@ class BulletTrajectorySimulator(QMainWindow):
 
         self.default_limits = {"x": None, "y": None, "z": None}
 
-        # Weapon presets
-        self.weapon_label = QLabel("Выберите оружие:")
-        self.param_layout.addWidget(self.weapon_label)
-        self.weapon_dropdown = QComboBox()
-        self.weapon_dropdown.addItems(WEAPON_PRESETS.keys())
-        self.param_layout.addWidget(self.weapon_dropdown)
-        self.weapon_button = QPushButton("Применить оружие")
-        self.weapon_button.clicked.connect(self.apply_weapon_preset)
-        self.param_layout.addWidget(self.weapon_button)
-
         # Ammo presets
         self.ammo_label = QLabel("Выберите боеприпас:")
         self.param_layout.addWidget(self.ammo_label)
@@ -293,15 +277,6 @@ class BulletTrajectorySimulator(QMainWindow):
         # Timer for auto-update
         self.timer = QTimer()
         self.timer.timeout.connect(self.run_simulation)
-
-    def apply_weapon_preset(self):
-        weapon_name = self.weapon_dropdown.currentText()
-        preset = WEAPON_PRESETS.get(weapon_name, {})
-        if preset:
-            self.entries["v0"].setText(str(preset["v0"]))
-            self.entries["m"].setText(str(preset["m"]))
-            self.entries["Cd"].setText(str(preset["Cd"]))
-            self.entries["diameter_mm"].setText(str(preset["diameter_mm"]))
 
     def apply_ammo_preset(self):
         ammo_name = self.ammo_dropdown.currentText()
