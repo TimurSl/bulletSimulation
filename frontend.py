@@ -254,7 +254,9 @@ class BulletTrajectorySimulator(QMainWindow):
             ("Коэф. сопротивления (Cd):", "Cd", 0.5),
             ("Диаметр пули (мм):", "diameter_mm", 12.7),
             ("Температура воздуха (T, K)", "T_kelvin", 288.15),
-            ("Влажность (%)", "humidity", 10)
+            ("Влажность (%)", "humidity", 10),
+            ("Широта (latitude, °)", "latitude", 45),
+            ("Ускорение свободного падения (g, м/с^2)", "g", 9.81)
         ]
 
         for label, key, default_value in self.params:
@@ -360,7 +362,7 @@ class BulletTrajectorySimulator(QMainWindow):
                 x0=params["x0"], y0=params["y0"], z0=params["z0"],
                 t_max=params["t_max"], dt=params["dt"],
                 m=params["m"], Cd=params["Cd"], A=params["A"], T_kelvin=params["T_kelvin"],
-                humidity=params["humidity"]
+                humidity=params["humidity"], latitude=params["latitude"], g=params["g"]
             )
 
             # Update plot

@@ -67,7 +67,7 @@ def calculate_deviation_with_angles(x, y, z, theta, phi, x0, y0, z0):
     return deviation_vector[0], deviation_vector[1], np.linalg.norm(deviation_vector)
 
 def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, humidity, x0=0, y0=0, z0=350, dt=0.01, t_max=20.0, m=0.045, Cd=0.5,
-                               A=np.pi * (12.7e-3 / 2) ** 2, rho0=1.225, g=9.81, T_kelvin=288.15):
+                               A=np.pi * (12.7e-3 / 2) ** 2, rho0=1.225, g=9.81, T_kelvin=288.15, latitude=45.0):
     """
     Simulate the trajectory of a bullet considering wind, air resistance, and temperature.
 
@@ -89,10 +89,16 @@ def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, humidity, x0=0, y0=0,
         rho0 (float): Air density at sea level (default: 1.225 kg/m^3).
         g (float): Gravitational acceleration (default: 9.81 m/s^2).
         T_kelvin (float): Air temperature in Kelvin (default: 288.15 K, 15°C).
+        latitude (float): Latitude of the location (default: 45.0 degrees).
+        humidity (float): Humidity in percentage (0-100).
 
     Returns:
-        tuple: Three lists containing the X, Y, and Z coordinates of the bullet's trajectory.
+        tuple: Four lists containing the X, Y, and Z coordinates and deviation of the bullet's trajectory.
     """
+
+    omega = 7.2921e-5
+    lat_rad = np.radians(latitude)
+
     steps = int(t_max / dt)
     vx0 = v0 * np.cos(theta) * np.cos(phi)
     vy0 = v0 * np.cos(theta) * np.sin(phi)
@@ -115,9 +121,18 @@ def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, humidity, x0=0, y0=0,
         Fy = -0.5 * Cd * A * rho * v_rel * v_rel_y
         Fz = -0.5 * Cd * A * rho * v_rel * v_rel_z - m * g
 
-        vx += (Fx / m) * dt
-        vy += (Fy / m) * dt
-        vz += (Fz / m) * dt
+        # Coriolis force
+        Fx_coriolis = -2 * m * omega * (vy * np.sin(lat_rad) - vz * np.cos(lat_rad))
+        Fy_coriolis = 2 * m * omega * (vx * np.sin(lat_rad))
+        Fz_coriolis = 2 * m * omega * (vx * np.cos(lat_rad))
+
+        Fx_final = Fx + Fx_coriolis
+        Fy_final = Fy + Fy_coriolis
+        Fz_final = Fz - m * g + Fz_coriolis
+
+        vx += (Fx_final / m) * dt
+        vy += (Fy_final / m) * dt
+        vz += (Fz_final / m) * dt
 
         new_x = x[-1] + vx * dt
         new_y = y[-1] + vy * dt
