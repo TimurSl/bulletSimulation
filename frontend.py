@@ -1,4 +1,5 @@
-﻿from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QSpinBox, QSplitter)
+﻿from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit,
+                               QPushButton, QComboBox, QSpinBox, QSplitter, QScrollArea, QGroupBox)
 from PySide6.QtCore import QTimer
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
@@ -144,26 +145,66 @@ ENVIRONMENT_PRESETS = {
     "Storm": {"wx": 20, "wy": 15, "wz": 5}
 }
 
+scrollbar_style = """
+        QScrollBar:vertical {
+            width: 10px;
+        }
+        QScrollBar:horizontal {
+            height: 10px;
+        }
+        """
+
+
 class BulletTrajectorySimulator(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Bullet Trajectory Simulator (Presets)")
 
-        # Main layout
         self.main_widget = QWidget()
         self.setCentralWidget(self.main_widget)
         self.layout = QHBoxLayout()
         self.main_widget.setLayout(self.layout)
 
-        # Добавляем QSplitter
         splitter = QSplitter()
         self.layout.addWidget(splitter)
 
-        # Левая часть: параметры
         param_widget = QWidget()
         param_widget.setLayout(QVBoxLayout())
         splitter.addWidget(param_widget)
-        self.param_layout = param_widget.layout()  # Сохраняем ссылку на макет параметров
+        self.param_layout = param_widget.layout()
+
+        # Scroll area for parameters
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_content = QWidget()
+        self.scroll_layout = QVBoxLayout()
+        self.scroll_content.setLayout(self.scroll_layout)
+        self.scroll_area.setWidget(self.scroll_content)
+
+        # Apply scrollbar style
+        self.scroll_area.setStyleSheet(scrollbar_style)
+
+        self.param_layout.addWidget(self.scroll_area)
+
+
+
+        # Group box for presets
+        self.preset_group = QGroupBox("Пресеты")
+        self.preset_layout = QVBoxLayout()
+        self.preset_group.setLayout(self.preset_layout)
+        self.scroll_layout.addWidget(self.preset_group)
+
+        # Group box for simulation settings
+        self.simulation_group = QGroupBox("Настройки симуляции")
+        self.simulation_layout = QVBoxLayout()
+        self.simulation_group.setLayout(self.simulation_layout)
+        self.scroll_layout.addWidget(self.simulation_group)
+
+        # Group box for scales
+        self.scale_group = QGroupBox("Масштабы")
+        self.scale_layout = QVBoxLayout()
+        self.scale_group.setLayout(self.scale_layout)
+        self.scroll_layout.addWidget(self.scale_group)
 
         # Правая часть: график
         self.figure, self.ax = plt.subplots(subplot_kw={"projection": "3d"})
@@ -177,82 +218,82 @@ class BulletTrajectorySimulator(QMainWindow):
 
         # Ammo presets
         self.ammo_label = QLabel("Выберите боеприпас:")
-        self.param_layout.addWidget(self.ammo_label)
+        self.preset_layout.addWidget(self.ammo_label)
         self.ammo_dropdown = QComboBox()
         self.ammo_dropdown.addItems(AMMO_PRESETS.keys())
-        self.param_layout.addWidget(self.ammo_dropdown)
+        self.preset_layout.addWidget(self.ammo_dropdown)
         self.ammo_button = QPushButton("Применить боеприпас")
         self.ammo_button.clicked.connect(self.apply_ammo_preset)
-        self.param_layout.addWidget(self.ammo_button)
+        self.preset_layout.addWidget(self.ammo_button)
 
         # Environment presets
         self.env_label = QLabel("Выберите окружение:")
-        self.param_layout.addWidget(self.env_label)
+        self.preset_layout.addWidget(self.env_label)
         self.env_dropdown = QComboBox()
         self.env_dropdown.addItems(ENVIRONMENT_PRESETS.keys())
-        self.param_layout.addWidget(self.env_dropdown)
+        self.preset_layout.addWidget(self.env_dropdown)
         self.env_button = QPushButton("Применить окружение")
         self.env_button.clicked.connect(self.apply_environment_preset)
-        self.param_layout.addWidget(self.env_button)
+        self.preset_layout.addWidget(self.env_button)
 
         # Simulation parameters
         self.entries = {}
         self.params = [
-            ("Начальная скорость (v0, м/с):", "v0"),
-            ("Угол возвышения (theta, °):", "theta"),
-            ("Азимутальный угол (phi, °):", "phi"),
-            ("Скорость ветра по X (wx, м/с):", "wx"),
-            ("Скорость ветра по Y (wy, м/с):", "wy"),
-            ("Скорость ветра по Z (wz, м/с):", "wz"),
-            ("Начальная позиция X (x0, м):", "x0"),
-            ("Начальная позиция Y (y0, м):", "y0"),
-            ("Начальная позиция Z (z0, м):", "z0"),
-            ("Время симуляции (t_max, с):", "t_max"),
-            ("Шаг времени (dt, с):", "dt"),
-            ("Масса пули (m, кг):", "m"),
-            ("Коэф. сопротивления (Cd):", "Cd"),
-            ("Диаметр пули (мм):", "diameter_mm"),
-            ("Температура воздуха (T, K)", "T_kelvin")
+            ("Начальная скорость (v0, м/с):", "v0", 900),
+            ("Угол возвышения (theta, °):", "theta", 0),
+            ("Азимутальный угол (phi, °):", "phi", 0),
+            ("Скорость ветра по X (wx, м/с):", "wx", 0),
+            ("Скорость ветра по Y (wy, м/с):", "wy", 0),
+            ("Скорость ветра по Z (wz, м/с):", "wz", 0),
+            ("Начальная позиция X (x0, м):", "x0", 0),
+            ("Начальная позиция Y (y0, м):", "y0", 0),
+            ("Начальная позиция Z (z0, м):", "z0", 1.5),
+            ("Время симуляции (t_max, с):", "t_max", 10),
+            ("Шаг времени (dt, с):", "dt", 0.01),
+            ("Масса пули (m, кг):", "m", 0.045),
+            ("Коэф. сопротивления (Cd):", "Cd", 0.5),
+            ("Диаметр пули (мм):", "diameter_mm", 12.7),
+            ("Температура воздуха (T, K)", "T_kelvin", 288.15),
+            ("Влажность (%)", "humidity", 10)
         ]
 
-        for label, key in self.params:
+        for label, key, default_value in self.params:
             param_label = QLabel(label)
-            self.param_layout.addWidget(param_label)
+            self.simulation_layout.addWidget(param_label)
             param_entry = QLineEdit()
-            self.param_layout.addWidget(param_entry)
+            param_entry.setText(str(default_value))
+            self.simulation_layout.addWidget(param_entry)
             self.entries[key] = param_entry
 
-        self.scale_label = QLabel("Масштаб графика:")
-        self.param_layout.addWidget(self.scale_label)
 
         self.scale_sliders = {}
         for axis in ["x", "y", "z"]:
             label = QLabel(f"Масштаб {axis}:")
-            self.param_layout.addWidget(label)
+            self.scale_layout.addWidget(label)
 
             slider = QSlider(Qt.Horizontal)
             slider.setMinimum(5)  # 1/4 от среднего значения
             slider.setMaximum(1000)  # 4x среднего значения
             slider.setValue(100)  # Исходное значение (1x)
             slider.valueChanged.connect(self.update_axis_scale)
-            self.param_layout.addWidget(slider)
+            self.scale_layout.addWidget(slider)
             self.scale_sliders[axis] = slider
 
 
         # Общий масштаб
         self.global_scale_label = QLabel("Общий масштаб:")
-        self.param_layout.addWidget(self.global_scale_label)
+        self.scale_layout.addWidget(self.global_scale_label)
         self.global_scale_slider = QSlider(Qt.Horizontal)
         self.global_scale_slider.setMinimum(5)
         self.global_scale_slider.setMaximum(1000)
         self.global_scale_slider.setValue(100)
         self.global_scale_slider.valueChanged.connect(self.update_global_scale)
-        self.param_layout.addWidget(self.global_scale_slider)
+        self.scale_layout.addWidget(self.global_scale_slider)
 
         # Кнопка сброса масштаба
         self.reset_button = QPushButton("Сбросить масштаб")
         self.reset_button.clicked.connect(self.reset_scale)
-        self.param_layout.addWidget(self.reset_button)
+        self.scale_layout.addWidget(self.reset_button)
 
         # Interval and auto-update
         self.interval_label = QLabel("Интервал автообновления (мс):")
@@ -313,12 +354,13 @@ class BulletTrajectorySimulator(QMainWindow):
             params["A"] = calculate_cross_sectional_area(params["diameter_mm"])
 
             # Run simulation
-            x, y, z = simulate_bullet_trajectory(
+            x, y, z, deviation = simulate_bullet_trajectory(
                 v0=params["v0"], theta=params["theta"], phi=params["phi"],
                 wx=params["wx"], wy=params["wy"], wz=params["wz"],
                 x0=params["x0"], y0=params["y0"], z0=params["z0"],
                 t_max=params["t_max"], dt=params["dt"],
-                m=params["m"], Cd=params["Cd"], A=params["A"], T_kelvin=params["T_kelvin"]
+                m=params["m"], Cd=params["Cd"], A=params["A"], T_kelvin=params["T_kelvin"],
+                humidity=params["humidity"]
             )
 
             # Update plot
@@ -326,15 +368,6 @@ class BulletTrajectorySimulator(QMainWindow):
             self.ax.plot(x, y, z, label="Trajectory", color="blue")
             self.ax.scatter(x[0], y[0], z[0], color="green", label="Shot Origin", s=50)
             self.ax.scatter(x[-1], y[-1], z[-1], color="red", label="Impact Point", s=50)
-
-            x, y, z = simulate_bullet_trajectory(
-                v0=params["v0"], theta=params["theta"], phi=params["phi"],
-                wx=0, wy=0, wz=0,
-                x0=params["x0"], y0=params["y0"], z0=params["z0"],
-                t_max=params["t_max"], dt=params["dt"],
-                m=params["m"], Cd=params["Cd"], A=params["A"], T_kelvin=params["T_kelvin"]
-            )
-            self.ax.plot(x, y, z, label="Trajectory (No Wind)", color="green")
 
             # Save axis limits
             self.default_limits = {
@@ -350,6 +383,44 @@ class BulletTrajectorySimulator(QMainWindow):
             self.ax.legend()
 
             self.canvas.draw()
+
+            # Remove previous deviation widgets if they exist
+            if hasattr(self, "deviation_canvas"):
+                self.layout.removeWidget(self.deviation_canvas)
+                self.deviation_canvas.deleteLater()
+                self.deviation_canvas = None
+
+            if hasattr(self, "deviation_label"):
+                self.layout.removeWidget(self.deviation_label)
+                self.deviation_label.deleteLater()
+                self.deviation_label = None
+
+            # Add 2D deviation plot
+            self.deviation_fig, self.deviation_ax = plt.subplots()
+
+            # Deviation is based on 3D trajectory
+            self.deviation_ax.scatter(0, 0, color="green", label="Target")
+            self.deviation_ax.scatter(deviation[1], 0, color="red", label="Impact")
+
+            # Adjust plot limits to ensure square shape
+            max_deviation = max(abs(deviation[1]), 1)  # Ensure at least 1 meter square
+            self.deviation_ax.set_xlim([-max_deviation, max_deviation])
+            self.deviation_ax.set_ylim([-max_deviation, max_deviation])
+            self.deviation_ax.set_aspect('equal', 'box')
+
+            # Add labels and legend
+            self.deviation_ax.set_xlabel("Deviation in Y (m)")
+            self.deviation_ax.set_ylabel("Deviation in X (m)")
+            self.deviation_ax.legend()
+
+            # Add numerical deviation display
+            self.deviation_label = QLabel(f"Deviation: Y = {deviation[1]:.2f} m")
+            self.layout.addWidget(self.deviation_label)
+
+            # Create a new canvas for the deviation plot
+            self.deviation_canvas = FigureCanvas(self.deviation_fig)
+            self.layout.addWidget(self.deviation_canvas)
+
         except Exception as e:
             print(f"Ошибка: {e}")
 
