@@ -252,7 +252,8 @@ class BulletTrajectorySimulator(QMainWindow):
             ("Шаг времени (dt, с):", "dt", 0.01),
             ("Масса пули (m, кг):", "m", 0.045),
             ("Коэф. сопротивления (Cd):", "Cd", 0.5),
-            ("Диаметр пули (мм):", "diameter_mm", 12.7),
+            ("Кросс-секция снаряда (A, м^2):", "A", 0),
+            ("Диаметр снаряда (мм):", "diameter_mm", 12.7),
             ("Температура воздуха (T, K)", "T_kelvin", 288.15),
             ("Влажность (%)", "humidity", 10),
             ("Широта (latitude, °)", "latitude", 45),
@@ -354,6 +355,9 @@ class BulletTrajectorySimulator(QMainWindow):
             params["theta"] *= np.pi / 180  # Convert degrees to radians
             params["phi"] *= np.pi / 180
             params["A"] = calculate_cross_sectional_area(params["diameter_mm"])
+
+            if params["A"] == "" or params["A"] == 0:
+                params["A"] = calculate_cross_sectional_area(params["diameter_mm"])
 
             # Run simulation
             x, y, z, deviation = simulate_bullet_trajectory(
