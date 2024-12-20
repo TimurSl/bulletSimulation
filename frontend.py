@@ -1,19 +1,17 @@
-﻿from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit,
-                               QPushButton, QComboBox, QSpinBox, QSplitter, QScrollArea, QGroupBox)
-from PySide6.QtCore import QTimer
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+﻿import os
+
 import matplotlib.pyplot as plt
 import numpy as np
-from simulation import simulate_bullet_trajectory, calculate_cross_sectional_area
-
-from PySide6.QtWidgets import QSlider
-from PySide6.QtCore import Qt
-import csv
-import os
-
-import chardet
-
 import pandas as pd
+from PySide6.QtCore import QTimer
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit,
+                               QPushButton, QComboBox, QSpinBox, QSplitter, QScrollArea, QGroupBox)
+from PySide6.QtWidgets import QSlider
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
+from simulation import simulate_bullet_trajectory, calculate_cross_sectional_area
+import chardet
 
 def load_ammo_presets_from_csv(file_path):
     """
@@ -27,7 +25,7 @@ def load_ammo_presets_from_csv(file_path):
     """
     try:
         # Определяем кодировку файла
-        import chardet
+
         with open(file_path, 'rb') as f:
             result = chardet.detect(f.read())
             encoding = result['encoding']
