@@ -65,7 +65,7 @@ def calculate_deviation_with_angles(x, y, z, theta, phi, x0, y0, z0):
     deviation_vector = point_to_target_vector - projected_point
     return deviation_vector[0], deviation_vector[1], np.linalg.norm(deviation_vector)
 
-def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, humidity, R, x0=0, y0=0, z0=350, dt=0.01, t_max=20.0, m=0.045, Cd=0.5,
+def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, humidity, R, C_m, x0=0, y0=0, z0=350, dt=0.01, t_max=20.0, m=0.045, Cd=0.5,
                                A=np.pi * (12.7e-3 / 2) ** 2, rho0=1.225, g=9.81, T_kelvin=288.15, latitude=45.0):
     """
     Simulate the trajectory of a bullet considering wind, air resistance, and temperature.
@@ -96,10 +96,7 @@ def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, humidity, R, x0=0, y0
         tuple: Four lists containing the X, Y, and Z coordinates and deviation of the bullet's trajectory.
     """
 
-    if R != 0:
-        omega = v0 * 2 * np.pi / R
-    else:
-        omega = 7.2921e-5
+    omega_coriolis = 7.2921e-5
     lat_rad = np.radians(latitude)
 
     steps = int(t_max / dt)
@@ -118,23 +115,45 @@ def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, humidity, R, x0=0, y0
         v_rel_y = vy - wy
         v_rel_z = vz - wz
 
-        v_rel = np.sqrt(v_rel_x ** 2 + v_rel_y ** 2 + v_rel_z ** 2)
+        v_rel_vec = np.array([v_rel_x, v_rel_y, v_rel_z])
+        v_rel = np.linalg.norm(v_rel_vec)
 
+        # Update linear speed
+        v = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
+
+        # Air resistance
         Fx = -0.5 * Cd * A * rho * v_rel * v_rel_x
         Fy = -0.5 * Cd * A * rho * v_rel * v_rel_y
         Fz = -0.5 * Cd * A * rho * v_rel * v_rel_z - m * g
 
-        FM = 0.5 * rho * A * v_rel ** 2 * omega
-        Fy += FM  # Включение эффекта Магнуса в вертикальную силу
+        # Magnus effect
+        omega_mag = (2 * np.pi * v) / R  # Angular velocity magnitude
+        if v > 0:
+            omega_vector = omega_mag * (np.array([vx, vy, vz]) / v)
+        else:
+            omega_vector = np.array([0, 0, 0])
+
+        # Check angle between omega and v_rel to avoid parallel vectors
+        cos_theta = np.dot(omega_vector, v_rel_vec) / (np.linalg.norm(omega_vector) * v_rel + 1e-8)
+        if abs(cos_theta) > 0.99:  # Nearly parallel
+            # Slightly adjust omega_vector to avoid perfect alignment
+            omega_vector = omega_vector + np.array([0.01, -0.01, 0.01])
+
+        if v_rel > 0:
+            F_magnus = C_m * 0.5 * rho * A * v_rel ** 2 * np.cross(omega_vector, v_rel_vec / v_rel)
+        else:
+            F_magnus = np.array([0, 0, 0])
+
+        Fx_magnus, Fy_magnus, Fz_magnus = F_magnus
 
         # Coriolis force
-        Fx_coriolis = -2 * m * omega * (vy * np.sin(lat_rad) - vz * np.cos(lat_rad))
-        Fy_coriolis = 2 * m * omega * (vx * np.sin(lat_rad))
-        Fz_coriolis = 2 * m * omega * (vx * np.cos(lat_rad))
+        Fx_coriolis = -2 * m * omega_coriolis * (vy * np.sin(lat_rad) - vz * np.cos(lat_rad))
+        Fy_coriolis = 2 * m * omega_coriolis * (vx * np.sin(lat_rad))
+        Fz_coriolis = 2 * m * omega_coriolis * (vx * np.cos(lat_rad))
 
-        Fx_final = Fx + Fx_coriolis
-        Fy_final = Fy + Fy_coriolis
-        Fz_final = Fz - m * g + Fz_coriolis
+        Fx_final = Fx + Fx_magnus + Fx_coriolis
+        Fy_final = Fy + Fy_magnus + Fy_coriolis
+        Fz_final = (Fz - m * g) + Fz_magnus + Fz_coriolis
 
         vx += (Fx_final / m) * dt
         vy += (Fy_final / m) * dt
