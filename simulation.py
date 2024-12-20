@@ -6,20 +6,22 @@ def calculate_cross_sectional_area(diameter_mm):
     diameter_m = diameter_mm / 1000  # Convert mm to meters
     return np.pi * (diameter_m / 2) ** 2
 
-def air_density(h, T_kelvin, rho0=1.225):
+def air_density_with_humidity(h, T_kelvin, humidity, rho0=1.225):
     """
-    Calculate air density based on altitude and temperature.
+    Calculate air density based on altitude, temperature, and humidity.
 
     Parameters:
         h (float): Altitude in meters.
         T_kelvin (float): Temperature in Kelvin.
+        humidity (float): Humidity in percentage (0-100).
         rho0 (float): Air density at sea level (default: 1.225 kg/m^3).
 
     Returns:
-        float: Air density at the given altitude and temperature.
+        float: Air density at the given altitude, temperature, and humidity.
     """
     T0 = 288.15  # Standard temperature at sea level in Kelvin (15°C)
-    return max(rho0 * (1 - 2.2e-5 * h) * (T0 / T_kelvin), 0.0)
+    water_vapor_effect = 1 - (humidity / 100) * 0.015
+    return max(rho0 * (1 - 2.2e-5 * h) * (T0 / T_kelvin) * water_vapor_effect, 0.0)
 
 def calculate_v0(base_v0, barrel_length, standard_length=20.0):
     """
@@ -35,7 +37,36 @@ def calculate_v0(base_v0, barrel_length, standard_length=20.0):
     """
     return base_v0 * (barrel_length / standard_length)
 
-def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, x0=0, y0=0, z0=350, dt=0.01, t_max=20.0, m=0.045, Cd=0.5,
+def calculate_deviation_with_angles(x, y, z, theta, phi, x0, y0, z0):
+    """
+    Calculate the deviation of the bullet impact from the intended trajectory line based on azimuth and elevation angles.
+
+    Parameters:
+        x (float): Final X-coordinate of the bullet impact.
+        y (float): Final Y-coordinate of the bullet impact.
+        z (float): Final Z-coordinate of the bullet impact.
+        theta (float): Elevation angle in radians.
+        phi (float): Azimuthal angle in radians.
+        x0 (float): Initial X-coordinate of the shot.
+        y0 (float): Initial Y-coordinate of the shot.
+        z0 (float): Initial Z-coordinate of the shot.
+
+    Returns:
+        tuple: Deviation in the X, Y plane and along the trajectory line.
+    """
+    # Calculate the ideal impact point based on the trajectory angles
+    direction_vector = np.array([np.cos(theta) * np.cos(phi), np.cos(theta) * np.sin(phi), np.sin(theta)])
+    point_to_target_vector = np.array([x - x0, y - y0, z - z0])
+
+    # Project point-to-target vector onto direction vector
+    projection_length = np.dot(point_to_target_vector, direction_vector)
+    projected_point = projection_length * direction_vector
+
+    # Deviation is the vector difference
+    deviation_vector = point_to_target_vector - projected_point
+    return deviation_vector[0], deviation_vector[1], np.linalg.norm(deviation_vector)
+
+def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, humidity, x0=0, y0=0, z0=350, dt=0.01, t_max=20.0, m=0.045, Cd=0.5,
                                A=np.pi * (12.7e-3 / 2) ** 2, rho0=1.225, g=9.81, T_kelvin=288.15):
     """
     Simulate the trajectory of a bullet considering wind, air resistance, and temperature.
@@ -72,7 +103,7 @@ def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, x0=0, y0=0, z0=350, d
 
     for i in range(steps):
         h = z[-1]
-        rho = air_density(h, T_kelvin, rho0)
+        rho = air_density_with_humidity(h, T_kelvin, humidity, rho0)
 
         v_rel_x = vx - wx
         v_rel_y = vy - wy
@@ -99,4 +130,5 @@ def simulate_bullet_trajectory(v0, theta, phi, wx, wy, wz, x0=0, y0=0, z0=350, d
         y.append(new_y)
         z.append(new_z)
 
-    return x, y, z
+    deviation = calculate_deviation_with_angles(x[-1], y[-1], z[-1], theta, phi, x0, y0, z0)
+    return x, y, z, deviation
