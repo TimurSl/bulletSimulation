@@ -465,7 +465,7 @@ class BulletTrajectorySimulator(QMainWindow):
             # Deviation is based on 3D trajectory
             self.deviation_ax.scatter(0, 0, color="green", label="Target")
             self.deviation_ax.scatter(deviation[1], 0, color="red", label="Impact")
-            self.deviation_ax.annotate(f"Deviation: {deviation[1]:.2f} m", (deviation[1], 0), textcoords="offset points", xytext=(0, 10), ha='center')
+            self.deviation_ax.annotate(f"Deviation: {deviation[1]:.4f} m", (deviation[1], 0), textcoords="offset points", xytext=(0, 10), ha='center')
 
             # Adjust plot limits to ensure square shape
             max_deviation = max(abs(deviation[1]), 1)  # Ensure at least 1 meter square
