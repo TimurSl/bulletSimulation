@@ -60,59 +60,70 @@ else:
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.042,
-        "v0": 928
+        "v0": 928,
+        "R": 0.381,
     },
     ".50 BMG | 647 gr Speer (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
         "m": 0.042,
-        "v0": 928
+        "v0": 928,
+        "R": 0.381,
+
     },
     ".50 BMG | 655 gr ADI (G1)": {
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.042,
-        "v0": 923
+        "v0": 923,
+        "R": 0.381,
     },
     ".50 BMG | 655 gr ADI (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
         "m": 0.042,
-        "v0": 923
+        "v0": 923,
+        "R": 0.381,
     },
     ".50 BMG | 700 gr Barnes (G1)": {
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.045,
-        "v0": 908
+        "v0": 908,
+        "R": 0.381,
     },
     ".50 BMG | 700 gr Barnes (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
         "m": 0.045,
-        "v0": 908
+        "R": 0.381,
+        "v0": 908,
     },
     ".50 BMG | 750 gr Hornady (G1)": {
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.049,
-        "v0": 860
+        "R": 0.381,
+        "v0": 860,
     },
     ".50 BMG | 750 gr Hornady (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
         "m": 0.049,
-        "v0": 860
+        "R": 0.381,
+        "v0": 860,
     },
     ".50 BMG | 800 gr Barnes (G1)": {
         "Cd": 0.686,
         "diameter_mm": 12.98,
         "m": 0.052,
+        "R": 0.381,
         "v0": 882
     },
     ".50 BMG | 800 gr Barnes (G7)": {
         "Cd": 0.351,
         "diameter_mm": 12.98,
+        "R": 0.381,
         "m": 0.052,
         "v0": 882
     },
@@ -295,6 +306,7 @@ class BulletTrajectorySimulator(QMainWindow):
             ("Время симуляции (t_max, с):", "t_max", 10),
             ("Шаг времени (dt, с):", "dt", 0.01),
             ("Масса пули (m, кг):", "m", 0.045),
+            ("Шаг нарезов снаряда (R, мм):", "R", 0.0),
             ("Коэф. сопротивления (Cd):", "Cd", 0.5),
             ("Кросс-секция снаряда (A, м^2):", "A", 0),
             ("Диаметр снаряда (мм):", "diameter_mm", 12.7),
@@ -374,6 +386,8 @@ class BulletTrajectorySimulator(QMainWindow):
             self.entries["diameter_mm"].setText(str(preset["diameter_mm"]))
             self.entries["m"].setText(str(preset["m"]))
             self.entries["v0"].setText(str(preset["v0"]))
+            if preset["R"] is not None:
+                self.entries["R"].setText(str(preset["R"]))
 
     def apply_environment_preset(self):
         env_name = self.env_dropdown.currentText()
