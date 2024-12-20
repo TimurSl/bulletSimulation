@@ -308,6 +308,7 @@ class BulletTrajectorySimulator(QMainWindow):
             ("Масса пули (m, кг):", "m", 0.045),
             ("Шаг нарезов снаряда (R, мм):", "R", 0.0),
             ("Коэф. сопротивления (Cd):", "Cd", 0.5),
+            ("Коэффициент подъёмной силы (Cl):", "C_m", 0.2),
             ("Кросс-секция снаряда (A, м^2):", "A", 0),
             ("Диаметр снаряда (мм):", "diameter_mm", 12.7),
             ("Температура воздуха (T, K)", "T_kelvin", 288.15),
@@ -423,7 +424,7 @@ class BulletTrajectorySimulator(QMainWindow):
                 x0=params["x0"], y0=params["y0"], z0=params["z0"],
                 t_max=params["t_max"], dt=params["dt"],
                 m=params["m"], Cd=params["Cd"], A=params["A"], T_kelvin=params["T_kelvin"],
-                humidity=params["humidity"], latitude=params["latitude"], g=params["g"], R=params["R"]
+                humidity=params["humidity"], latitude=params["latitude"], g=params["g"], R=params["R"], C_m=params["C_m"]
             )
 
             # Update plot
