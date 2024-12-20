@@ -423,6 +423,8 @@ class BulletTrajectorySimulator(QMainWindow):
             self.deviation_canvas = FigureCanvas(self.deviation_fig)
             self.layout.addWidget(self.deviation_canvas)
 
+            self.update_axis_scale()
+
         except Exception as e:
             print(f"Ошибка: {e}")
 
