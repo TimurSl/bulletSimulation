@@ -1,6 +1,5 @@
 ﻿import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+
 
 def calculate_cross_sectional_area(diameter_mm):
     diameter_m = diameter_mm / 1000  # Convert mm to meters
