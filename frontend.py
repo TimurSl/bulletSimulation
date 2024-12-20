@@ -423,7 +423,7 @@ class BulletTrajectorySimulator(QMainWindow):
                 x0=params["x0"], y0=params["y0"], z0=params["z0"],
                 t_max=params["t_max"], dt=params["dt"],
                 m=params["m"], Cd=params["Cd"], A=params["A"], T_kelvin=params["T_kelvin"],
-                humidity=params["humidity"], latitude=params["latitude"], g=params["g"]
+                humidity=params["humidity"], latitude=params["latitude"], g=params["g"], R=params["R"]
             )
 
             # Update plot
