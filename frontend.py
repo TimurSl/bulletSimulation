@@ -8,9 +8,53 @@ from simulation import simulate_bullet_trajectory, calculate_cross_sectional_are
 
 from PySide6.QtWidgets import QSlider
 from PySide6.QtCore import Qt
+import csv
+import os
 
-# Пресеты боеприпасов
-AMMO_PRESETS = {
+import chardet
+
+import pandas as pd
+
+def load_ammo_presets_from_csv(file_path):
+    """
+    Загрузить данные о боеприпасах из CSV в формат AMMO_PRESETS с использованием pandas.
+
+    Parameters:
+        file_path (str): Путь к CSV-файлу.
+
+    Returns:
+        dict: Структура AMMO_PRESETS.
+    """
+    try:
+        # Определяем кодировку файла
+        import chardet
+        with open(file_path, 'rb') as f:
+            result = chardet.detect(f.read())
+            encoding = result['encoding']
+
+        # Чтение CSV с помощью pandas с найденной кодировкой
+        df = pd.read_csv(file_path, encoding=encoding, dtype={'R': 'float'})
+        ammo_presets = {
+            row['Type']: {
+                "Cd": float(row["Cd"]),
+                "diameter_mm": float(row["diameter_mm"]),
+                "m": float(row["m"]),
+                "v0": int(row["v0"]),
+                "R": float(row["R"]) if pd.notna(row["R"]) else None
+            } for _, row in df.iterrows()
+        }
+        return ammo_presets
+    except Exception as e:
+        print(f"Ошибка при загрузке CSV: {e}")
+        return {}
+
+
+
+
+if os.path.exists("ammo_presets.csv"):
+    AMMO_PRESETS = load_ammo_presets_from_csv("ammo_presets.csv")
+else:
+    AMMO_PRESETS = {
     # .50 BMG
     ".50 BMG | 647 gr Speer (G1)": {
         "Cd": 0.686,
@@ -354,7 +398,6 @@ class BulletTrajectorySimulator(QMainWindow):
             params = {key: float(self.entries[key].text()) for key in self.entries}
             params["theta"] *= np.pi / 180  # Convert degrees to radians
             params["phi"] *= np.pi / 180
-            params["A"] = calculate_cross_sectional_area(params["diameter_mm"])
 
             if params["A"] == "" or params["A"] == 0:
                 params["A"] = calculate_cross_sectional_area(params["diameter_mm"])
