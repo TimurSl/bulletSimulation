@@ -478,8 +478,8 @@ class BulletTrajectorySimulator(QMainWindow):
             self.deviation_ax.legend()
 
             # Add numerical deviation display
-            self.deviation_label = QLabel(f"Deviation: Y = {deviation[1]:.2f} m")
-            self.layout.addWidget(self.deviation_label)
+            #self.deviation_label = QLabel(f"Deviation: Y = {deviation[1]:.2f} m")
+            #self.layout.addWidget(self.deviation_label)
 
             # Create a new canvas for the deviation plot
             self.deviation_canvas = FigureCanvas(self.deviation_fig)
