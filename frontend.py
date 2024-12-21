@@ -305,8 +305,10 @@ class BulletTrajectorySimulator(QMainWindow):
             ("Шаг времени (dt, с):", "dt", 0.01),
             ("Масса пули (m, кг):", "m", 0.045),
             ("Шаг нарезов снаряда (R, м):", "R", 0.3),
+            ("Коэф. спин-дрейфа (C_spin):", "C_spin", 1e-6),
+            ("Направление вращения нарезов (rifling_sign):", "rifling_sign", 1),
             ("Коэф. сопротивления (Cd):", "Cd", 0.5),
-            ("Коэффициент подъёмной силы (Cl):", "C_m", 0.2),
+            ("Коэф. Магнуса (Cl, кг·м^2):", "Cl", 1e-6),
             ("Кросс-секция снаряда (A, м^2):", "A", 0),
             ("Диаметр снаряда (мм):", "diameter_mm", 12.7),
             ("Температура воздуха (T, K)", "T_kelvin", 288.15),
@@ -422,7 +424,9 @@ class BulletTrajectorySimulator(QMainWindow):
                 x0=params["x0"], y0=params["y0"], z0=params["z0"],
                 t_max=params["t_max"], dt=params["dt"],
                 m=params["m"], Cd=params["Cd"], A=params["A"], T_kelvin=params["T_kelvin"],
-                humidity=params["humidity"], latitude=params["latitude"], g=params["g"], R=params["R"], C_m=params["C_m"]
+                humidity=params["humidity"], latitude=params["latitude"], g=params["g"], R=params["R"],
+                C_m=params["Cl"],
+                C_spin=params["C_spin"], rifling_sign=params["rifling_sign"]
             )
 
             # Update plot
