@@ -107,27 +107,7 @@ def compute_derivatives(state, params):
     Fy = -0.5 * Cd * A * rho * v_rel * v_rel_y
     Fz = -0.5 * Cd * A * rho * v_rel * v_rel_z - m * g
 
-    # Магнус эффект
-    if v > 0:
-        omega_mag = (2 * np.pi * v) / R
-        v_norm = np.linalg.norm([vx, vy, vz])
-        if v_norm > 1e-8:
-            omega_vector = omega_mag * np.array([vx, vy, vz]) / v_norm
-        else:
-            omega_vector = np.array([0.0, 0.0, 0.0])
-    else:
-        omega_vector = np.array([0.0, 0.0, 0.0])
 
-    cos_theta = np.dot(omega_vector, v_rel_vec) / (np.linalg.norm(omega_vector) * v_rel + 1e-8)
-    if abs(cos_theta) > 0.99:
-        omega_vector += np.array([0.01, -0.01, 0.01])
-
-    if v_rel > 0:
-        F_magnus = C_m * 0.5 * rho * A * v_rel**2 * np.cross(omega_vector, v_rel_vec / v_rel)
-    else:
-        F_magnus = np.array([0, 0, 0])
-
-    Fx_magnus, Fy_magnus, Fz_magnus = F_magnus
 
     # Сила Кориолиса
     omega_coriolis = 7.2921e-5
@@ -157,9 +137,9 @@ def compute_derivatives(state, params):
 
 
     # Sum all forces
-    Fx_final = Fx + Fx_magnus + Fx_coriolis + Fx_spin
-    Fy_final = Fy + Fy_magnus + Fy_coriolis + Fy_spin
-    Fz_final = Fz + Fz_magnus + Fz_coriolis + Fz_spin
+    Fx_final = Fx + Fx_coriolis + Fx_spin
+    Fy_final = Fy + Fy_coriolis + Fy_spin
+    Fz_final = Fz + Fz_coriolis + Fz_spin
 
     # Производные
     dxdt = vx
